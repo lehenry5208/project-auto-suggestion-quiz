@@ -1,3 +1,11 @@
+# Render Blueprint — deploy backend + frontend from this repo
+# https://render.com/docs/blueprint-spec
+#
+# After connecting this repo in Render:
+# 1. Dashboard → New → Blueprint → select this repo
+# 2. Set secret env vars when prompted (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY)
+# 3. Update Supabase Auth → URL Configuration → Site URL to your frontend URL
+
 services:
   - type: web
     name: autosuggestions-backend
@@ -6,6 +14,29 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: FRONTEND_URL
+        value: https://autosuggestions.onrender.com
+
+  - type: web
+    name: autosuggestions
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://autosuggestions-backend.onrender.com
