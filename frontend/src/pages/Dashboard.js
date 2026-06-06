@@ -267,7 +267,7 @@ function ProblemCard({ problem, onShare, onDelete, onViewSubmissions }) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-function Dashboard({ problems = [], problemsLoading = false, problemsError = '', onCreateProblem, onDeleteProblem, onLogout, user, onProblemsUpdate, onRefresh, onReview, autofillPending = false }) {
+function Dashboard({ problems = [], problemsLoading = false, problemsError = '', onCreateProblem, onDeleteProblem, onLogout, user, onProblemsUpdate, onRefresh, onReview, autofillPending = false, autofillGenerating = false, autofillError = '', onDismissAutofillError }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [shareModal, setShareModal] = useState(null);
     const [deleteModal, setDeleteModal] = useState(null);
@@ -330,8 +330,8 @@ function Dashboard({ problems = [], problemsLoading = false, problemsError = '',
                         {problemsLoading ? '↻ Loading…' : '↻ Refresh'}
                     </button>
                     <button className="btn btn-outline" onClick={onCreateProblem} style={{ position: 'relative' }}>
-                        + New Problem
-                        {autofillPending && (
+                        {autofillGenerating ? '⏳ Generating…' : '+ New Problem'}
+                        {autofillPending && !autofillGenerating && (
                             <span style={{
                                 position: 'absolute',
                                 top: '-6px',
@@ -352,6 +352,29 @@ function Dashboard({ problems = [], problemsLoading = false, problemsError = '',
             </header>
 
             <div className="dashboard">
+
+                {autofillGenerating && (
+                    <div style={{
+                        margin: '0 0 1rem', padding: '0.75rem 1rem', borderRadius: '6px',
+                        background: 'rgba(86,156,214,0.12)', border: '1px solid rgba(86,156,214,0.4)',
+                        color: '#569cd6', fontSize: '14px',
+                    }}>
+                        ⏳ Generating your problem with AI… it will appear here automatically when ready.
+                    </div>
+                )}
+
+                {autofillError && (
+                    <div style={{
+                        margin: '0 0 1rem', padding: '0.75rem 1rem', borderRadius: '6px',
+                        background: 'rgba(244,67,54,0.12)', border: '1px solid rgba(244,67,54,0.4)',
+                        color: '#f44336', fontSize: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    }}>
+                        <span>{autofillError}</span>
+                        {onDismissAutofillError && (
+                            <button className="btn btn-outline" onClick={onDismissAutofillError} style={{ marginLeft: '1rem' }}>Dismiss</button>
+                        )}
+                    </div>
+                )}
 
                 {/* Stats */}
                 <div className="stats-bar">

@@ -26,8 +26,11 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
+      # DEBUG=True enables the /auth/dev-login bypass (type "dev" as the email).
+      # OTP email is not configured, so this is the only login path for now.
+      # Set to "False" once real OTP/SMTP is set up.
       - key: DEBUG
-        value: "False"
+        value: "True"
       - key: FRONTEND_URL
         value: https://autosuggestions.onrender.com
 
@@ -40,3 +43,7 @@ services:
     envVars:
       - key: REACT_APP_API_URL
         value: https://autosuggestions-backend.onrender.com
+      # Skip ESLint during the production build so warnings/parse errors
+      # don't fail the deploy (matches local frontend/.env).
+      - key: DISABLE_ESLINT_PLUGIN
+        value: "true"

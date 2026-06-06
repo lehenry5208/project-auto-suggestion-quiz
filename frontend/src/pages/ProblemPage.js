@@ -8,6 +8,24 @@ import { executeCode, startSubmission, saveDraft, submitCode } from '../api';
  * @module ProblemPage
  */
 
+/**
+ * Compares an actual result against an expected test value, tolerating
+ * surrounding quotes (e.g. AI-generated expected values like "Fizz") and
+ * surrounding whitespace.
+ */
+function testValuesMatch(actual, expected) {
+  const normalize = (s) => {
+    let t = String(s).trim();
+    if (t.length >= 2 &&
+        ((t[0] === '"' && t[t.length - 1] === '"') ||
+         (t[0] === "'" && t[t.length - 1] === "'"))) {
+      t = t.slice(1, -1).trim();
+    }
+    return t;
+  };
+  return normalize(actual) === normalize(expected);
+}
+
 function ProblemPage({ problem, onBack, studentName }) {
   const availableLanguages = problem.languages?.length
     ? AVAILABLE_LANGUAGES.filter(l => problem.languages.includes(l.key))
@@ -482,7 +500,7 @@ _stderr = _stderr_buf.getvalue()
             await pyodide.runPythonAsync(code);
             const result = await pyodide.runPythonAsync(tc.input);
             actual = result === null || result === undefined ? 'None' : String(result);
-            passed = actual.trim() === String(tc.expected).trim();
+            passed = testValuesMatch(actual, tc.expected);
           } catch (err) {
             const rawMsg = err.message || String(err);
             const firstLine = rawMsg.split('\n').find(l => l.trim()) || rawMsg;
@@ -522,7 +540,7 @@ _stderr = _stderr_buf.getvalue()
               actual = actual.length > 80 ? actual.slice(0, 77) + '...' : actual;
             } else {
               actual = (result.output || '').trim();
-              passed = actual === String(tc.expected).trim();
+              passed = testValuesMatch(actual, tc.expected);
             }
           } catch (err) {
             actual = err.message;
@@ -548,7 +566,7 @@ _stderr = _stderr_buf.getvalue()
           await pyodide.runPythonAsync(currentCode);
           const result = await pyodide.runPythonAsync(tc.input);
           actual = result === null || result === undefined ? 'None' : String(result);
-          passed = actual.trim() === String(tc.expected).trim();
+          passed = testValuesMatch(actual, tc.expected);
         } catch (err) {
           const rawMsg = err.message || String(err);
           const firstLine = rawMsg.split('\n').find(l => l.trim()) || rawMsg;
@@ -568,7 +586,7 @@ _stderr = _stderr_buf.getvalue()
             actual = actual.length > 80 ? actual.slice(0, 77) + '...' : actual;
           } else {
             actual = (result.output || '').trim();
-            passed = actual === String(tc.expected).trim();
+            passed = testValuesMatch(actual, tc.expected);
           }
         } catch (err) {
           actual = err.message;

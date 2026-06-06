@@ -579,7 +579,7 @@ function AutofillModal({ onClose, onStartBackgroundGenerate }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-function CreateProblemPage({ onBack, onCreated, autofillResult, onAutofillConsumed, onAutofillReady }) {
+function CreateProblemPage({ onBack, onCreated, autofillResult, onAutofillConsumed, onAutofillReady, onAutofillStart }) {
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -778,6 +778,7 @@ function CreateProblemPage({ onBack, onCreated, autofillResult, onAutofillConsum
           onClose={() => setShowAutofill(false)}
           onStartBackgroundGenerate={(rawText) => {
             setShowAutofill(false);
+            if (onAutofillStart) onAutofillStart();
             onBack();
             const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
             fetch(`${apiUrl}/ai/autofill`, {
@@ -787,9 +788,9 @@ function CreateProblemPage({ onBack, onCreated, autofillResult, onAutofillConsum
             })
               .then(res => res.json())
               .then(data => {
-                if (data && !data.error && onAutofillReady) onAutofillReady(data);
+                if (onAutofillReady) onAutofillReady(data || { error: 'The AI returned an empty response. Please try again.' });
               })
-              .catch(() => {});
+              .catch(() => { if (onAutofillReady) onAutofillReady({ error: 'Could not reach the AI service. Is the backend running?' }); });
           }}
         />
       )}
