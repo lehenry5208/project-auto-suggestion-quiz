@@ -34,7 +34,7 @@ services:
       - key: DEBUG
         value: "True"
       - key: FRONTEND_URL
-        value: https://autosuggestions.onrender.com
+        value: https://autosuggestions-qb8u.onrender.com
 
   - type: web
     name: autosuggestions
